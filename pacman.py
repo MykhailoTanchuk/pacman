@@ -1,0 +1,49 @@
+import pygame
+
+YELLOW = (255, 255, 0)
+PACMAN_SIZE = 40  # Розмір Пакмена
+CELL_SIZE = 40  # Розмір клітинки
+
+
+class Pacman:
+    def __init__(self, x, y):
+        # Позиція базується на клітинках (grid_x, grid_y) замість пікселів
+        self.grid_x = x // CELL_SIZE
+        self.grid_y = y // CELL_SIZE
+        self.moving = False  # Відстежує, чи рухається Пакмен зараз
+
+    def update(self, maze, events):
+        for event in events:
+            if event.type == pygame.KEYDOWN and not self.moving:
+                if event.key == pygame.K_LEFT:
+                    self.try_move(-1, 0, maze)
+                elif event.key == pygame.K_RIGHT:
+                    self.try_move(1, 0, maze)
+                elif event.key == pygame.K_UP:
+                    self.try_move(0, -1, maze)
+                elif event.key == pygame.K_DOWN:
+                    self.try_move(0, 1, maze)
+
+            if event.type == pygame.KEYUP:
+                self.moving = False  # Скидання флагу руху після відпускання клавіші
+
+    def try_move(self, dx, dy, maze):
+        """Намагається перемістити Пакмена на одну клітинку у напрямку (dx, dy)."""
+        new_x = self.grid_x + dx
+        new_y = self.grid_y + dy
+
+        # Перевіряємо, чи нова позиція знаходиться в межах лабіринту
+        if 0 <= new_x < len(maze.grid[0]) and 0 <= new_y < len(maze.grid):
+            # Перевіряємо, чи нова клітинка є вільною (не стіна)
+            if maze.grid[new_y][new_x] == 0:
+                self.grid_x = new_x
+                self.grid_y = new_y
+                self.moving = True  # Встановлюємо флаг руху, щоб запобігти подвійному кліку
+
+    def draw(self, screen):
+        # Обчислюємо піксельну позицію на основі клітинкової позиції
+        pixel_x = self.grid_x * CELL_SIZE
+        pixel_y = self.grid_y * CELL_SIZE
+
+        # Малюємо Пакмена в центрі клітинки
+        pygame.draw.circle(screen, YELLOW, (pixel_x + CELL_SIZE // 2, pixel_y + CELL_SIZE // 2), PACMAN_SIZE // 2)
